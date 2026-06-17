@@ -23,9 +23,9 @@ export default {
     port: process.env.PSQL_PORT,
     dialectOptions: {
         encrypt: true,
-        /*ssl: {
+        ssl: {
             rejectUnauthorized: false
-        }*/
+        }
     },
 
     define: {
