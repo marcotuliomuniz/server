@@ -1,0 +1,9 @@
+{
+    "search.exclude": {
+        "**/build": true,
+        "**/build/*": true
+    },
+    "files.exclude": {
+        "**/build": true
+    }
+}

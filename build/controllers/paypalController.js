@@ -1,0 +1,154 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const axios_1 = __importDefault(require("axios"));
+const console_1 = require("console");
+const isJson_1 = __importDefault(require("../functions/isJson"));
+const paymentsControllers_1 = require("./paymentsControllers");
+const URL_1 = require("../configs/constants/URL");
+const redisConfig_1 = require("../configs/cache/redisConfig");
+const PlanAndPrice_1 = __importDefault(require("../functions/PlanAndPrice"));
+async function generateAccessToken() {
+    const response = await axios_1.default.post(`${URL_1.URL_PAYPAL_BASE}/v1/oauth2/token`, 'grant_type=client_credentials', {
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        auth: {
+            username: process.env.PAYPAL_CLIENT_ID,
+            password: process.env.PAYPAL_SECRET
+        },
+    });
+    return response.data.access_token;
+}
+const paypalController = {
+    async create_order(req, res) {
+        //@ts-ignore
+        const uid = req.uid;
+        //@ts-ignore
+        const email = req.email;
+        //@ts-ignore
+        if (!(email && uid))
+            return res
+                .status(400)
+                .json({ message: 'payment pro error - cant get payer customer data' })
+                .end();
+        const { plan } = req.body;
+        const PLAN = (0, PlanAndPrice_1.default)(plan);
+        if (!PLAN)
+            return res
+                .status(400)
+                .json({ message: 'payment pro error - not a valid plan' })
+                .end();
+        const PRICE = PLAN.price;
+        const CANCEL_URL = `${URL_1.URL_REACT_CLIENT}/work/create`;
+        const RETURN_URL = `${URL_1.URL_REACT_CLIENT}/paypal/checkout/pro`;
+        const description = `Plano PRO @${uid}`;
+        try {
+            const accessToken = await generateAccessToken();
+            const response = await axios_1.default
+                .post(`${URL_1.URL_PAYPAL_BASE}/v2/checkout/orders`, {
+                intent: 'CAPTURE',
+                purchase_units: [
+                    {
+                        items: [
+                            {
+                                name: 'PRO subscription plan',
+                                description,
+                                quantity: 1,
+                                unit_amount: {
+                                    currency_code: 'USD',
+                                    value: PRICE
+                                }
+                            }
+                        ],
+                        amount: {
+                            currency_code: 'USD',
+                            value: PRICE,
+                            breakdown: {
+                                item_total: {
+                                    currency_code: 'USD',
+                                    value: PRICE
+                                }
+                            }
+                        }
+                    }
+                ],
+                application_context: {
+                    return_url: RETURN_URL,
+                    cancel_url: CANCEL_URL,
+                    shipping_preference: 'NO_SHIPPING',
+                    brand_name: 'portfólio Marco Túlio'
+                }
+            }, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (!response?.data?.id)
+                return res.status(500).end();
+            await (0, redisConfig_1.setCache)(`paypal_pro:${response.data.id}`, JSON.stringify({
+                uid, email, price: PRICE
+            }));
+            res.json({ id: response.data.id });
+        }
+        catch (err) {
+            console.error(err);
+            res.status(500).send('Erro ao criar ordem');
+        }
+    },
+    async capture(req, res) {
+        //const orderId = req.query.token;
+        const { orderId } = req.body;
+        //const accessToken = await generateAccessToken();
+        /*
+        const response = await axios({
+            url: URL_PAYPAL_BASE + `/v2/checkout/orders/${orderId}/capture`,
+            method: 'post',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + accessToken
+            }
+        })
+            .catch((err: Error) => error(err));
+
+        if (!(response && response.data && response.data.links)) return res.status(204).end();
+
+        */
+        const redisKey = `paypal_pro:${orderId}`;
+        let getData = await (0, redisConfig_1.getCache)(redisKey);
+        if (!(0, isJson_1.default)(getData)) {
+            let message = 'make paypal erro - schema format';
+            (0, console_1.error)(message);
+            return res
+                .status(400)
+                .json({ message })
+                .end();
+        }
+        const data = JSON.parse(`${getData}`);
+        if (!(data?.uid && data?.email)) {
+            let message = 'paypal pro error - missing data';
+            (0, console_1.error)(message);
+            return res
+                .status(400)
+                .json({ message })
+                .end();
+        }
+        /*if (response.data && response.data.status === 'COMPLETED') {*/
+        if (true) {
+            return await (0, paymentsControllers_1.makePro)(res, data.uid, {
+                email: data.email,
+                id: orderId,
+                //date_approved: response.data.date_approved,
+                date_approved: new Date(),
+                amount: data.price,
+                name: ''
+            });
+        }
+        else
+            return res.status(204).end();
+    }
+};
+exports.default = paypalController;

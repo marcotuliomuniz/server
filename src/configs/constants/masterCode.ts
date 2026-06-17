@@ -1,0 +1,1 @@
+export const masterCode = process.env.MASTERCODE;
