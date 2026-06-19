@@ -6,9 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.makePro = void 0;
 require("dotenv/config");
 const console_1 = require("console");
-const transporter_1 = __importDefault(require("../email/transporter"));
 const Users_1 = __importDefault(require("../models/Users"));
-const voucherOptions_1 = __importDefault(require("../email/options/voucherOptions"));
 const addOneYear_1 = __importDefault(require("../functions/addOneYear"));
 const priceTag_1 = require("../configs/constants/priceTag");
 const makePro = async (res, user_uid, transaction) => {
@@ -42,21 +40,31 @@ const makePro = async (res, user_uid, transaction) => {
     //@ts-ignore
     await Users_1.default.update(update, { where: { uid: user_uid } })
         .then(async () => {
+        /*
         try {
-            transporter_1.default.sendMail((0, voucherOptions_1.default)(
-            //@ts-ignore
-            transaction.email, transaction.id, user_uid, transaction.date_approved, transaction.amount, 
-            //@ts-ignore
-            transaction.name), function (err, info) {
-                if (err) {
-                    console.error(err);
-                }
-            });
-        }
-        catch (err) {
-            console.error('Payment | Push or E-mail Error: ', err);
-        }
-        ;
+            transporter.sendMail(
+                voucherOptions(
+                    //@ts-ignore
+                    transaction.email,
+
+                    transaction.id,
+
+                    user_uid,
+                    transaction.date_approved,
+                    transaction.amount,
+
+                    //@ts-ignore
+                    transaction.name
+
+                ), function (err, info) {
+                    if (err) {
+                        console.error(err)
+                    }
+                });
+
+        } catch (err) {
+            console.error('Payment | Push or E-mail Error: ', err)
+        };*/
         return res.status(200).end();
     })
         .catch((err) => {

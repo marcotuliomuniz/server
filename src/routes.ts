@@ -38,7 +38,7 @@ import tmpController from './controllers/tmpController';
 import pixController from './controllers/pixController';
 import proController from './controllers/proController';
 import end from './middlewares/end';
-import paypalController from './controllers/paypalController';
+//import paypalController from './controllers/paypalController';
 import internationalsController from './controllers/internationalsController';
 
 /*
@@ -47,6 +47,7 @@ import internationalsController from './controllers/internationalsController';
 import './models/connection/connection';
 //import gpayStripeController from './controllers/gpayStripeController';
 import isVip from './middlewares/isVip';
+import viptController from './controllers/vipController';
 
 /*
     * Users 
@@ -126,8 +127,10 @@ routes.get('/tmp/list/premium', tmpController.premium);
 /*
     * PIX - Mercado Pago
 */
-routes.get('/pix/generate/pro/:plan', authorization, pixController.generate);
-routes.post('/pix/status/pro/:user_uid', pixController.status);
+//routes.get('/pix/generate/pro/:plan', authorization, pixController.generate);
+//routes.post('/pix/status/pro/:user_uid', pixController.status);
+routes.get('/pix/fake/pro/:plan/', authorization, pixController.fake);
+routes.get('/vip/confirmation', isVip,  viptController.confirmation)
 
 /*
     * Google Play - Stripe
@@ -137,7 +140,7 @@ routes.post('/pix/status/pro/:user_uid', pixController.status);
 //routes.post('/confirm-payment', gpayStripeController.confirm);
 
 //PayPal
-routes.post('/paypal/capture', paypalController.capture);
-routes.post('/paypal/create-order', authorization, paypalController.create_order);
+//routes.post('/paypal/capture', paypalController.capture);
+//routes.post('/paypal/create-order', authorization, paypalController.create_order);
 
 export default routes; 

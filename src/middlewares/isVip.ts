@@ -27,8 +27,6 @@ export default async function isVip(req: Request, res: Response, next: NextFunct
 
     const { uid }: any = jwt.decode(token);
 
-    
-
     if (uid === null) {
         return next()
     };

@@ -64,6 +64,7 @@ export const makePro = async (
         { where: { uid: user_uid } }
     )
         .then(async () => {
+            /*
             try {
                 transporter.sendMail(
                     voucherOptions(
@@ -87,7 +88,7 @@ export const makePro = async (
 
             } catch (err) {
                 console.error('Payment | Push or E-mail Error: ', err)
-            };
+            };*/
 
             return res.status(200).end()
         })

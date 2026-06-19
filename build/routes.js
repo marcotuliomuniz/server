@@ -39,7 +39,7 @@ const tmpController_1 = __importDefault(require("./controllers/tmpController"));
 const pixController_1 = __importDefault(require("./controllers/pixController"));
 const proController_1 = __importDefault(require("./controllers/proController"));
 const end_1 = __importDefault(require("./middlewares/end"));
-const paypalController_1 = __importDefault(require("./controllers/paypalController"));
+//import paypalController from './controllers/paypalController';
 const internationalsController_1 = __importDefault(require("./controllers/internationalsController"));
 /*
     * Connection:
@@ -47,6 +47,7 @@ const internationalsController_1 = __importDefault(require("./controllers/intern
 require("./models/connection/connection");
 //import gpayStripeController from './controllers/gpayStripeController';
 const isVip_1 = __importDefault(require("./middlewares/isVip"));
+const vipController_1 = __importDefault(require("./controllers/vipController"));
 /*
     * Users
 */
@@ -114,8 +115,10 @@ routes.get('/tmp/list/premium', tmpController_1.default.premium);
 /*
     * PIX - Mercado Pago
 */
-routes.get('/pix/generate/pro/:plan', authorization_1.default, pixController_1.default.generate);
-routes.post('/pix/status/pro/:user_uid', pixController_1.default.status);
+//routes.get('/pix/generate/pro/:plan', authorization, pixController.generate);
+//routes.post('/pix/status/pro/:user_uid', pixController.status);
+routes.get('/pix/fake/pro/:plan/', authorization_1.default, pixController_1.default.fake);
+routes.get('/vip/confirmation', isVip_1.default, vipController_1.default.confirmation);
 /*
     * Google Play - Stripe
 */
@@ -123,6 +126,6 @@ routes.post('/pix/status/pro/:user_uid', pixController_1.default.status);
 //routes.post('/google-pay/process', gpayStripeController.process);
 //routes.post('/confirm-payment', gpayStripeController.confirm);
 //PayPal
-routes.post('/paypal/capture', paypalController_1.default.capture);
-routes.post('/paypal/create-order', authorization_1.default, paypalController_1.default.create_order);
+//routes.post('/paypal/capture', paypalController.capture);
+//routes.post('/paypal/create-order', authorization, paypalController.create_order);
 exports.default = routes;
