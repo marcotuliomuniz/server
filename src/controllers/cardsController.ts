@@ -43,8 +43,8 @@ const cardsController = {
                     .filter((word) => word !== 'de')
                     .map((word) => `'%${word}%'`)
                     .join(', ');
-                searchQ = ` AND (works.title ILIKE ANY(ARRAY[${words}]) 
-                OR users.profession ILIKE ANY(ARRAY[${words}])) `
+                searchQ = ` AND (unaccent(works.title) ILIKE ANY(ARRAY[unaccent(${words})]) 
+                OR unaccent(users.profession) ILIKE ANY(ARRAY[unaccent(${words})])) `
             }
             return searchQ;
         };
